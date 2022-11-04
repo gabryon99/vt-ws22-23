@@ -5,19 +5,15 @@ pub enum OpCode {
     DECA = 0x03,
     SETL = 0x04,
     BACK7 = 0x05,
-    UKN = 0xff,
 }
 
-impl From<u8> for OpCode {
-    fn from(b: u8) -> Self {
-        match b {
-            0x00 => Self::HALT,
-            0x01 => Self::CLRA,
-            0x02 => Self::INC3A,
-            0x03 => Self::DECA,
-            0x04 => Self::SETL,
-            0x05 => Self::BACK7,
-            _ => Self::UKN,
+impl TryFrom<u8> for OpCode {
+    type Error = &'static str;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0x00 | 0x01 | 0x02 | 0x03 | 0x04 | 0x05 => Ok(unsafe { std::mem::transmute(value) }),
+            _ => Err("invalid OpCode value"),
         }
     }
 }
@@ -31,7 +27,6 @@ impl std::fmt::Display for OpCode {
             OpCode::DECA => "DECA",
             OpCode::SETL => "SETL",
             OpCode::BACK7 => "BACK7",
-            OpCode::UKN => "UKN",
         };
         write!(f, "{}", str_opcode)
     }

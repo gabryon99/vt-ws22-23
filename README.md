@@ -17,10 +17,10 @@ At the beginning, the IP register has value 0. Registers A and L are customizabl
 
 The machine has 7 instructions, encoded as 1 byte (=opcode):
 1. `HALT  (0x00)`: stops the machine;
-2. `CLRA  (0x01)`: clear the register A (aka. set A = 0);
-3. `INC3A (0x02)`: increment register A of 3 (aka. A += 3);
-4. `DECA  (0x03)`: decrement register A of 1 (aka. A -= 1);
-5. `SETL  (0x04)`: copy value of register A to register L (aka. L = A);
+2. `CLRA  (0x01)`: clear the register A (aka. `set A = 0`);
+3. `INC3A (0x02)`: increment register A of 3 (aka. `A += 3`);
+4. `DECA  (0x03)`: decrement register A of 1 (aka. `A -= 1`);
+5. `SETL  (0x04)`: copy value of register A to register L (aka. `L = A`);
 6. `BACK7 (0x05)`: decrement the value of register L. If the value of L is positive, jump back of 7 instructions (i.e. loop body is 6 one-byte instructions and the BACK7 itself). Otherwise, continue the execution
 7. `UKN (0xff)`: invalid opcode.
 

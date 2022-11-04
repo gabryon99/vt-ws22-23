@@ -1,4 +1,7 @@
-use crate::vm::{opcode::OpCode, VM};
+use crate::vm::{
+    opcode::{self, OpCode},
+    VM,
+};
 
 use super::Interpreter;
 
@@ -13,16 +16,13 @@ impl Interpreter for SimpleInterpreter {
 
             let instr = vm.running_program.data[vm.registers.ip as usize];
 
-            match OpCode::from(instr) {
+            match OpCode::try_from(instr).unwrap() {
                 OpCode::HALT => self.halt(vm, instr),
                 OpCode::CLRA => self.clra(vm, instr),
                 OpCode::INC3A => self.inc3a(vm, instr),
                 OpCode::DECA => self.deca(vm, instr),
                 OpCode::SETL => self.setl(vm, instr),
                 OpCode::BACK7 => self.back7(vm, instr),
-                OpCode::UKN => {
-                    panic!("Error contained in the program, invalid OpCode: {}", instr);
-                }
             }
 
             // Increase Instruction Pointer of instruction size
