@@ -16,6 +16,7 @@ fn main() {
     let args = Args::parse();
     // Load program from the command line
     let prog = vm::program::Program::read_from_file(args.path);
+    println!("{}", prog);
 
     // Execute the program on a simple VM
     let mut vm = VM::new(vm::RunningMode::Simple, prog);
