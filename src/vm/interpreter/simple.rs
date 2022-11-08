@@ -10,7 +10,7 @@ pub struct SimpleInterpreter;
 impl Interpreter for SimpleInterpreter {
     fn run(&self, vm: &mut VM) {
         loop {
-            if vm.halted {
+            if vm.halt {
                 break;
             }
 
@@ -31,7 +31,7 @@ impl Interpreter for SimpleInterpreter {
     }
 
     fn halt(&self, vm: &mut VM, _instr: u8) {
-        vm.halted = true;
+        vm.halt = true;
     }
 
     fn clra(&self, vm: &mut VM, _instr: u8) {

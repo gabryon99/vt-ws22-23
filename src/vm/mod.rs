@@ -3,9 +3,8 @@ pub mod program;
 
 mod interpreter;
 
-use program::Program;
-
 use self::interpreter::Interpreter;
+use program::Program;
 
 #[derive(Debug)]
 pub enum RunningMode {
@@ -25,7 +24,7 @@ pub struct VM {
     registers: Registers,
     running_program: Program,
     mode: RunningMode,
-    halted: bool,
+    halt: bool,
 }
 
 impl std::fmt::Display for VM {
@@ -46,7 +45,7 @@ impl VM {
                 acc: running_program.initial_acc,
                 lc: running_program.initial_lc,
             },
-            halted: false,
+            halt: false,
             running_program,
             mode,
         }

@@ -7,15 +7,16 @@ pub struct Program {
     pub data: Vec<u8>,
     pub initial_acc: i32,
     pub initial_lc: i32,
-    pub filename: String,
+    pub filename: Option<String>,
 }
 
 impl std::fmt::Display for Program {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let no_file = "<no-file>".to_string();
         write!(
             f,
             "Program(filename: `{}`, ACC: {}, LC: {}, Size: {})",
-            self.filename,
+            self.filename.as_ref().unwrap_or(&no_file),
             self.initial_acc,
             self.initial_lc,
             self.data.len()
@@ -26,6 +27,15 @@ impl std::fmt::Display for Program {
 }
 
 impl Program {
+    pub fn new(data: Vec<u8>, initial_acc: i32, initial_lc: i32) -> Self {
+        Program {
+            data,
+            initial_acc,
+            initial_lc,
+            filename: None,
+        }
+    }
+
     pub fn read_from_file(path: PathBuf) -> Self {
         let filename = path.to_str().unwrap().to_string();
 
@@ -43,7 +53,7 @@ impl Program {
                     data,
                     initial_acc,
                     initial_lc,
-                    filename,
+                    filename: Some(filename),
                 };
             }
             Err(e) => {
