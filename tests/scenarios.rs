@@ -42,27 +42,27 @@ fn generate_scenario(size: usize, seed: i32, mut probs: [i32; 5]) -> vm::program
 #[test]
 pub fn scenario_1() {
     let prog = generate_scenario(10_000, 1, [0, 1, 0, 0, 0]);
-    let mut vm = vm::VM::new(vm::RunningMode::Simple, prog);
+    let vm = vm::VM::new(vm::RunningMode::Simple, prog);
     vm.run();
 }
 
 #[test]
 pub fn scenario_2() {
     let prog = generate_scenario(10_000, 1, [1, 1, 1, 0, 0]);
-    let mut vm = vm::VM::new(vm::RunningMode::Simple, prog);
+    let vm = vm::VM::new(vm::RunningMode::Simple, prog);
     vm.run();
 }
 
 #[test]
 pub fn scenario_3() {
     let prog = generate_scenario(10_000, 1, [1, 9, 1, 5, 5]);
-    let mut vm = vm::VM::new(vm::RunningMode::Simple, prog);
+    let vm = vm::VM::new(vm::RunningMode::Simple, prog);
     vm.run();
 }
 
 #[test]
 pub fn scenario_4() {
     let prog = generate_scenario(50_000, 1, [1, 9, 1, 5, 5]);
-    let mut vm = vm::VM::new(vm::RunningMode::Simple, prog);
+    let vm = vm::VM::new(vm::RunningMode::Simple, prog);
     vm.run();
 }
