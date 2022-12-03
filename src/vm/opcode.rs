@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum OpCode {
     HALT = 0x00,
     CLRA = 0x01,
@@ -20,14 +21,6 @@ impl TryFrom<u8> for OpCode {
 
 impl std::fmt::Display for OpCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str_opcode = match self {
-            OpCode::HALT => "HALT",
-            OpCode::CLRA => "CLRA",
-            OpCode::INC3A => "INC3A",
-            OpCode::DECA => "DECA",
-            OpCode::SETL => "SETL",
-            OpCode::BACK7 => "BACK7",
-        };
-        write!(f, "{}", str_opcode)
+        write!(f, "{:?}", self)
     }
 }

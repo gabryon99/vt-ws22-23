@@ -19,7 +19,7 @@ fn main() {
     println!("{}", prog);
 
     // Execute the program on a simple VM
-    let mut vm = VM::new(vm::RunningMode::Simple, prog);
+    let vm = VM::new(vm::RunningMode::Jitted, prog);
     println!("[info] :: Before execution -> {}", vm);
     vm.run();
     println!("[info] :: After execution -> {}", vm);

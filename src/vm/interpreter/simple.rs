@@ -1,5 +1,5 @@
 use crate::vm::{
-    opcode::{self, OpCode},
+    opcode::{OpCode},
     VM,
 };
 
@@ -8,13 +8,16 @@ use super::Interpreter;
 pub struct SimpleInterpreter;
 
 impl Interpreter for SimpleInterpreter {
-    fn run(&self, vm: &mut VM) {
+    fn run(&self, vm: &VM) {
+        use std::time::Instant;
+        let now = Instant::now();
+
         loop {
-            if vm.halt {
+            if vm.is_halt() {
                 break;
             }
 
-            let instr = vm.running_program.data[vm.registers.ip as usize];
+            let instr = vm.running_program.data[vm.registers.ip_value() as usize];
 
             match OpCode::try_from(instr).unwrap() {
                 OpCode::HALT => self.halt(vm, instr),
@@ -26,36 +29,37 @@ impl Interpreter for SimpleInterpreter {
             }
 
             // Increase Instruction Pointer of instruction size
-            vm.registers.ip += 1;
+            vm.registers.ip.replace(vm.registers.ip_value() + 1);
         }
+
+        let elapsed = now.elapsed();
+        println!("[simple] :: Elapsed: {:.2?}", elapsed);
     }
 
-    fn halt(&self, vm: &mut VM, _instr: u8) {
-        vm.halt = true;
+    fn halt(&self, vm: &VM, _instr: u8) {
+        vm.halt.replace(true);
     }
 
-    fn clra(&self, vm: &mut VM, _instr: u8) {
-        vm.registers.acc = 0;
+    fn clra(&'_ self, vm: &VM, _instr: u8) {
+        vm.registers.acc.replace(0);
     }
 
-    fn inc3a(&self, vm: &mut VM, _instr: u8) {
-        vm.registers.acc += 3;
+    fn inc3a(&'_ self, vm: &VM, _instr: u8) {
+        vm.registers.acc.replace(vm.registers.acc_value() + 3);
     }
 
-    fn deca(&self, vm: &mut VM, _instr: u8) {
-        vm.registers.acc -= 1;
+    fn deca(&'_ self, vm: &VM, _instr: u8) {
+        vm.registers.acc.replace(vm.registers.acc_value() - 1);
     }
 
-    fn setl(&self, vm: &mut VM, _instr: u8) {
-        vm.registers.lc = vm.registers.acc;
+    fn setl(&'_ self, vm: &VM, _instr: u8) {
+        vm.registers.lc.replace(vm.registers.acc_value());
     }
 
-    fn back7(&self, vm: &mut VM, _instr: u8) {
-        vm.registers.lc -= 1;
-        if vm.registers.lc >= 0 {
-            // Of 8 positions because the IP will be increased
-            // after the function's execution
-            vm.registers.ip -= 8;
+    fn back7(&'_ self, vm: &VM, _instr: u8) {
+        vm.registers.lc.replace(vm.registers.lc_value() - 1);
+        if vm.registers.lc_value() >= 0 {
+            vm.registers.ip.replace(vm.registers.ip_value() - 7);
         }
     }
 }

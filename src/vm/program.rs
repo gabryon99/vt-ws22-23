@@ -49,17 +49,17 @@ impl Program {
                 let initial_lc = r_lc.read_i32::<LittleEndian>().unwrap();
 
                 let data = file_content[8..].to_vec();
-                return Program {
+                Program {
                     data,
                     initial_acc,
                     initial_lc,
                     filename: Some(filename),
-                };
+                }
             }
             Err(e) => {
                 eprintln!(
                     "[error] :: an error occurred when reading the program: {}",
-                    e.to_string()
+                    e
                 );
                 std::process::exit(-1);
             }
