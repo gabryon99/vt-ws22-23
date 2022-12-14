@@ -1,10 +1,15 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, collections::VecDeque};
 
 use byteorder::{LittleEndian, ReadBytesExt};
 
-#[derive(Debug)]
+use super::opcode::OpCode;
+
+type Instruction = u8;
+type BasicBlock = Vec<Instruction>;
+
+#[derive(Debug, Clone)]
 pub struct Program {
-    pub data: Vec<u8>,
+    pub data: Vec<Instruction>,
     pub initial_acc: i32,
     pub initial_lc: i32,
     pub filename: Option<String>,
@@ -15,13 +20,26 @@ impl std::fmt::Display for Program {
         let no_file = "<no-file>".to_string();
         write!(
             f,
-            "Program(filename: `{}`, ACC: {}, LC: {}, Size: {})",
+            "Program(filename: `{}`, ACC: {}, LC: {}, Size: {}, Code: [",
             self.filename.as_ref().unwrap_or(&no_file),
             self.initial_acc,
             self.initial_lc,
             self.data.len()
         )
         .unwrap();
+
+        // Print actual code
+        if self.data.len() <= 128 {
+            write!(f, "[\n").unwrap();
+            for (index, instr) in self.data.iter().enumerate() {
+                write!(f, "\t{}: {}\n", index + 1, OpCode::try_from(*instr).unwrap()).unwrap();
+            }
+            write!(f, "])").unwrap();
+        }
+        else {
+            write!(f, "...])").unwrap();
+        }
+
         Ok(())
     }
 }
@@ -65,4 +83,47 @@ impl Program {
             }
         }
     }
+
+    pub fn build_basic_blocks(&self) -> Vec<BasicBlock> {
+
+        let mut basic_blocks: Vec<BasicBlock> = vec![];
+        let mut current_block = vec![];
+
+        // Inject SPILL instructions before Basic Block transformation
+        let mut data = VecDeque::new();
+        let mut spills = 0;
+
+        for i in 0..self.data.len() {
+            
+            let instruction = self.data[i];
+            data.push_back(instruction);
+
+            match OpCode::try_from(instruction).unwrap() {
+                OpCode::BACK7 => {
+                    // Inject SPILL 
+                    data.insert((i + spills) - 6, OpCode::SPILL.into());
+                    spills += 1;
+                }
+                _ => ()
+            }
+        }
+
+        for instruction in data {
+
+            current_block.push(instruction);
+
+            match OpCode::try_from(instruction).unwrap() {
+                OpCode::BACK7 | OpCode::SPILL => {
+                    basic_blocks.push(current_block);
+                    current_block = vec![];
+                }
+                _ => ()
+            }
+        }
+
+        basic_blocks.push(current_block);
+
+        basic_blocks
+    }
+
 }
