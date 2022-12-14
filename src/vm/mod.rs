@@ -1,21 +1,23 @@
 pub mod opcode;
 pub mod program;
+pub mod utils;
 
 mod interpreter;
 
-use std::{cell::Cell, borrow::Borrow};
+use std::{cell::Cell, borrow::Borrow, time::Duration};
 
 use self::interpreter::Interpreter;
-use inkwell::context::Context;
+use inkwell::{context::Context, OptimizationLevel};
 use program::Program;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub enum RunningMode {
     Simple,
-    Jitted,
+    NoOptJitted,
+    OptJitted
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Registers {
     ip: Cell<u32>,  // Instruction Pointer
     acc: Cell<i32>, // Accumulator
@@ -28,14 +30,21 @@ pub struct VM {
     running_program: Program,
     mode: RunningMode,
     halt: Cell<bool>,
+    pub running_time: Cell<Duration>,
+}
+
+impl PartialEq for VM {
+    fn eq(&self, other: &Self) -> bool {
+        self.registers == other.registers
+    }
 }
 
 impl std::fmt::Display for VM {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "ip: {}, acc: {}, lc: {}",
-            self.registers.ip.get(), self.registers.acc.get(), self.registers.lc.get()
+            "VM(ip: {}, acc: {}, lc: {}, running_time: {:.2?})",
+            self.registers.ip.get(), self.registers.acc.get(), self.registers.lc.get(), self.running_time.get()
         )
     }
 }
@@ -55,6 +64,7 @@ impl VM {
                 lc: Cell::new(running_program.initial_lc),
             },
             halt: Cell::new(false),
+            running_time: Cell::new(Duration::new(0, 0)),
             running_program,
             mode,
         }
@@ -65,11 +75,21 @@ impl VM {
     }
 
     pub fn run(&self) {
+
         match self.mode {
-            RunningMode::Simple => interpreter::simple::SimpleInterpreter {}.run(self),
-            RunningMode::Jitted => {
+            RunningMode::Simple => {
+                interpreter::simple::SimpleInterpreter {}.run(self);
+            },
+            RunningMode::NoOptJitted | RunningMode::OptJitted => {
+
+                let opt_level = match self.mode {
+                    RunningMode::NoOptJitted => OptimizationLevel::None,
+                    RunningMode::OptJitted => OptimizationLevel::Default,
+                    _ => unreachable!()
+                };
+
                 let ctx = Context::create();
-                let jitted = interpreter::jitted::JittedInterpreter::new(ctx.borrow());
+                let jitted = interpreter::jitted::JittedInterpreter::new(ctx.borrow(), opt_level);
                 jitted.run(self);
             }
         }
